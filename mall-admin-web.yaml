@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mall-admin-web
+  namespace: mall
+  labels:
+    app: mall-admin-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mall-admin-web
+  template:
+    metadata:
+      labels:
+        app: mall-admin-web
+        version: v1
+    spec:
+      containers:
+        - name: mall-admin-web
+          image: pubrepo.jiagouyun.com/demo/mall_admin_web_vke:1.3
+#          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: default-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mall-admin-web
+  namespace: mall
+spec:
+  type: NodePort
+  selector:
+    app: mall-admin-web
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30180
