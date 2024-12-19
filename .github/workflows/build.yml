@@ -1,0 +1,59 @@
+name: Build and push mall images
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_and_push_images:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        file_tag:
+          - file: ./docker/ack/Dockerfile
+            repo: mall-admin-app-ack
+            context: ./docker/ack
+          - file: ./docker/vke/Dockerfile
+            repo: mall-admin-app-vke
+            context: ./docker/vke
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build with NPM
+        run: |
+          # export NODE_OPTIONS=--openssl-legacy-provider
+          npm install --registry=https://registry.npmmirror.com #安装依赖
+          npm run build
+
+      - name: Copy dist to folder
+        run: cd docker && bash copy-html.sh
+        shell: bash
+
+      - name: Log in to the Docker registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ vars.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Matrix Build and push demo images
+        uses: docker/build-push-action@v3.3.1
+        with:
+          context: ${{ matrix.file_tag.context }}
+          file: ${{ matrix.file_tag.file }}
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/${{ matrix.file_tag.repo }}:${{ github.sha }}
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/${{ matrix.file_tag.repo }}:latest
+          cache-from: type=gha
+          cache-to: type=gha
+
