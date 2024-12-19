@@ -8,12 +8,12 @@ usage() {
 
 # copy html
 echo "begin copy html to ack "
-cp -r ./dist/** ./docker/ack/dist
+cp -r ../dist/** ./ack/dist
 
-find ./docker/ack/dist -type f -name "index.html" |xargs sed -i "s#datakit_env#prod#g"
-find ./docker/ack/dist -type f -name "index.html" |xargs sed -i "s#datakit_service#mall-admin-app-ack#g"
+find ./ack/dist -type f -name "index.html" |xargs sed -i "s#datakit_env#prod#g"
+find ./ack/dist -type f -name "index.html" |xargs sed -i "s#datakit_service#mall-admin-app-ack#g"
 
 echo "begin copy html to vke "
-cp -r ./dist/** ./docker/vke/dist
-find ./docker/vke/dist -type f -name "index.html" |xargs sed -i "s#datakit_env#test#g"
-find ./docker/vke/dist -type f -name "index.html" |xargs sed -i "s#datakit_service#mall-admin-app-vke#g"
+cp -r ../dist/** ./vke/dist
+find ./vke/dist -type f -name "index.html" |xargs sed -i "s#datakit_env#test#g"
+find ./vke/dist -type f -name "index.html" |xargs sed -i "s#datakit_service#mall-admin-app-vke#g"
